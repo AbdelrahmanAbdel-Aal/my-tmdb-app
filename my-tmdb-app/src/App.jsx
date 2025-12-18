@@ -1,15 +1,19 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Routes, Route } from "react-router-dom";
+import Home from "./pages/Home";
+import MovieDetails from "./pages/MovieDetails";
+import Navbar from "./components/Navbar";
+import Search from "./pages/Search";
 
-function App() {
-
+export default function App() {
   return (
-    <div>
-      <h1>My TMDB App</h1>
-    </div>
-  )
-}
+    <div className="min-h-screen bg-gray-900">
+      <Navbar />
 
-export default App
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/movie/:id" element={<MovieDetails />} />
+        <Route path="/search" element={<Search />} />
+      </Routes>
+    </div>
+  );
+}
