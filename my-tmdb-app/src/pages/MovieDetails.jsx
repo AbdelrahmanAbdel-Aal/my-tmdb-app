@@ -5,6 +5,8 @@ import CastList from "../components/CastList";
 import MovieDetailsSkeleton from "../components/MovieDetailsSkeleton";
 import { useSimilarMovies } from "../hooks/useSimilarMovies";
 import SimilarMovies from "../components/SimilarMovies";
+import { useMovieVideos } from "../hooks/useMovieVideos";
+import MovieTrailer from "../components/MovieTrailer";
 
 export default function MovieDetails() {
   const { id } = useParams();
@@ -12,6 +14,7 @@ export default function MovieDetails() {
   const { data: movie, isLoading, error } = useMovieDetails(id);
   const { data: credits } = useMovieCredits(id);
     const { data: similar  } = useSimilarMovies(id);
+    const { data: videos } = useMovieVideos(id);
     
   if (isLoading) {
     return <MovieDetailsSkeleton />;
@@ -52,7 +55,8 @@ export default function MovieDetails() {
           <p>⭐ Rating: {movie.vote_average}</p>
         </div>
       </div>
-
+      {/* Trailer */}
+      {videos?.results && <MovieTrailer videos={videos.results} />}
       {/* Cast */}
       {credits?.cast && <CastList cast={credits.cast} />}
        <SimilarMovies movieId={id} />

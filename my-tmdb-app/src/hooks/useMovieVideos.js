@@ -1,11 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchFromApi } from "../api/tmdb";
 
-export function useMovieCredits(movieId) {
+export function useMovieVideos(movieId) {
   return useQuery({
-    queryKey: ["movie-credits", movieId],
+    queryKey: ["movie-videos", movieId],
     queryFn: () =>
-      fetchFromApi(`/movie/${movieId}/credits`),
+      fetchFromApi(`/movie/${movieId}/videos`),
     enabled: !!movieId,
   });
 }
