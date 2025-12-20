@@ -1,29 +1,31 @@
 import { useState, useEffect } from "react";
 
+const STORAGE_KEY = "favorites";
+
 export function useFavorites() {
-  const [favorites, setFavorites] = useState([]);
+  const [favorites, setFavorites] = useState(() => {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored ? JSON.parse(stored) : [];
+  });
 
   useEffect(() => {
-    const saved = JSON.parse(
-      localStorage.getItem("favorites")
-    );
-    if (saved) setFavorites(saved);
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem(
-      "favorites",
-      JSON.stringify(favorites)
-    );
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(favorites));
   }, [favorites]);
 
-  const toggleFavorite = movie => {
-    setFavorites(prev =>
-      prev.find(m => m.id === movie.id)
-        ? prev.filter(m => m.id !== movie.id)
+  const toggleFavorite = (movie) => {
+    setFavorites((prev) =>
+      prev.find((m) => m.id === movie.id)
+        ? prev.filter((m) => m.id !== movie.id)
         : [...prev, movie]
     );
   };
 
-  return { favorites, toggleFavorite };
+  const isFavorite = (id) =>
+    favorites.some((movie) => movie.id === id);
+
+  return {
+    favorites,
+    toggleFavorite,
+    isFavorite,
+  };
 }

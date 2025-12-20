@@ -12,6 +12,7 @@ export default function MovieDetails() {
   const { data: movie, isLoading, error } = useMovieDetails(id);
   const { data: credits } = useMovieCredits(id);
     const { data: similar  } = useSimilarMovies(id);
+    
   if (isLoading) {
     return <MovieDetailsSkeleton />;
   }
@@ -21,6 +22,7 @@ export default function MovieDetails() {
   }
   
   {similar?.results && (
+    
   <SimilarMovies movies={similar.results} />
 )}
 
@@ -53,6 +55,7 @@ export default function MovieDetails() {
 
       {/* Cast */}
       {credits?.cast && <CastList cast={credits.cast} />}
+       <SimilarMovies movieId={id} />
     </div>
   );
 }

@@ -2,10 +2,19 @@ import { Link } from "react-router-dom";
 import { useFavorites } from "../hooks/useFavorites";
 
 export default function MovieCard({ movie }) {
-  const { toggleFavorite } = useFavorites();
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const favorite = isFavorite(movie.id);
 
   return (
     <div className="relative">
+      {/* Favorite Button */}
+      <button
+        onClick={() => toggleFavorite(movie)}
+        className="absolute top-2 right-2 z-10 text-2xl cursor-pointer hover:scale-110 transition"
+      >
+        {favorite ? "❤️" : "🤍"}
+      </button>
+
       <Link to={`/movie/${movie.id}`}>
         <div className="bg-gray-800 text-white rounded overflow-hidden hover:scale-105 transition">
           <img
@@ -21,13 +30,6 @@ export default function MovieCard({ movie }) {
           </div>
         </div>
       </Link>
-
-      <button
-        onClick={() => toggleFavorite(movie)}
-        className="absolute top-2 right-2 text-xl"
-      >
-        ❤️
-      </button>
     </div>
   );
 }
