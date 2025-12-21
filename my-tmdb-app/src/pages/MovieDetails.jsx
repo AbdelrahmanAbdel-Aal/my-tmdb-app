@@ -1,65 +1,123 @@
-import { useParams, Link } from "react-router-dom";
+// src/pages/MovieDetails.jsx
+
+import { useParams, Link, useNavigate } from "react-router-dom"; // 👈 استدعاء useNavigate
 import { useMovieDetails } from "../hooks/useMovieDetails";
 import { useMovieCredits } from "../hooks/useMovieCredits";
+import { useMovieVideos } from "../hooks/useMovieVideos";
+import { useFavorites } from "../hooks/useFavorites";
+
 import CastList from "../components/CastList";
 import MovieDetailsSkeleton from "../components/MovieDetailsSkeleton";
-import { useSimilarMovies } from "../hooks/useSimilarMovies";
 import SimilarMovies from "../components/SimilarMovies";
-import { useMovieVideos } from "../hooks/useMovieVideos";
 import MovieTrailer from "../components/MovieTrailer";
 
 export default function MovieDetails() {
   const { id } = useParams();
+  const navigate = useNavigate(); // 👈 تهيئة useNavigate
+  const { toggleFavorite, isFavorite } = useFavorites();
 
   const { data: movie, isLoading, error } = useMovieDetails(id);
   const { data: credits } = useMovieCredits(id);
-    const { data: similar  } = useSimilarMovies(id);
-    const { data: videos } = useMovieVideos(id);
+  const { data: videos } = useMovieVideos(id);
     
+  const isCurrentlyFavorite = movie ? isFavorite(movie.id) : false;
+
   if (isLoading) {
     return <MovieDetailsSkeleton />;
   }
 
-  if (error) {
-    return <p className="text-red-500 p-6">Error loading movie</p>;
+  if (error || !movie) {
+    return <p className="text-red-500 p-6">Error loading movie or movie not found.</p>;
   }
   
-  {similar?.results && (
-    
-  <SimilarMovies movies={similar.results} />
-)}
-
+  const releaseYear = movie.release_date ? new Date(movie.release_date).getFullYear() : 'N/A';
+  const formatRuntime = (minutes) => {
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    return `${h}h ${m}m`;
+  };
+  
+  // دالة العودة
+  const handleGoBack = () => {
+    navigate(-1); // يعود خطوة واحدة في التاريخ
+  };
 
   return (
     <div className="p-6 text-white">
-      <Link to="/" className="text-blue-400 underline">
-        ← Back
-      </Link>
+      {/* 👈 زر العودة الفعال */}
+      <button 
+        onClick={handleGoBack}
+        className="text-blue-400 underline hover:text-blue-300 transition flex items-center mb-6"
+      >
+        <span className="mr-1">←</span> Back
+      </button>
 
-      <div className="mt-4 flex gap-6">
-        <img
-          src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-          alt={movie.title}
-          className="w-64 rounded"
-        />
-
-        <div>
-          <h1 className="text-3xl font-bold mb-2">
-            {movie.title}
+      <div className="flex gap-6 flex-col md:flex-row">
+        {/* 1. بوستر الفيلم وزر المفضلة */}
+        <div className="relative w-full md:w-64 flex-shrink-0">
+          <img
+            src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+            alt={movie.title}
+            className="w-full rounded shadow-xl"
+          />
+          <button
+              onClick={() => toggleFavorite(movie)}
+              className="absolute top-2 right-2 p-2 bg-gray-900 bg-opacity-75 rounded-full z-10 text-2xl cursor-pointer hover:scale-110 transition"
+          >
+              {isCurrentlyFavorite ? "❤️" : "🤍"}
+          </button>
+        </div>
+        
+        {/* 2. تفاصيل الفيلم */}
+        <div className="flex-1">
+          <h1 className="text-4xl font-extrabold mb-2">
+            {movie.title} ({releaseYear})
           </h1>
+          
+          <p className="text-gray-400 italic mb-4">{movie.tagline}</p>
 
-          <p className="text-gray-300 mb-4">
+          <div className="flex flex-wrap gap-3 mb-4 text-sm">
+            <span className="bg-blue-600 px-3 py-1 rounded-full">{movie.vote_average.toFixed(1)} / 10 ⭐</span>
+            <span className="bg-gray-700 px-3 py-1 rounded-full">{formatRuntime(movie.runtime)}</span>
+            {movie.genres?.map(genre => (
+                <span key={genre.id} className="bg-gray-700 px-3 py-1 rounded-full">
+                    {genre.name}
+                </span>
+            ))}
+          </div>
+
+          <h3 className="text-xl font-semibold mt-6 mb-2">Overview</h3>
+          <p className="text-gray-300 leading-relaxed">
             {movie.overview}
           </p>
 
-          <p>⭐ Rating: {movie.vote_average}</p>
+          <div className="mt-6 border-t border-gray-700 pt-4">
+              <p className="text-sm">
+                  <span className="font-semibold text-gray-400">Release Date:</span> {movie.release_date}
+              </p>
+              <p className="text-sm mt-1">
+                  <span className="font-semibold text-gray-400">Budget:</span> ${movie.budget.toLocaleString()}
+              </p>
+              <p className="text-sm mt-1">
+                  <span className="font-semibold text-gray-400">Revenue:</span> ${movie.revenue.toLocaleString()}
+              </p>
+          </div>
         </div>
       </div>
-      {/* Trailer */}
-      {videos?.results && <MovieTrailer videos={videos.results} />}
-      {/* Cast */}
-      {credits?.cast && <CastList cast={credits.cast} />}
-       <SimilarMovies movieId={id} />
+
+      {/* 3. عرض طاقم التمثيل */}
+      {credits?.cast?.length > 0 && (
+          <CastList cast={credits.cast} />
+      )}
+      
+      {/* 4. عرض الفيديوهات (التريلر) */}
+      {videos?.results?.length > 0 && (
+          <MovieTrailer videos={videos.results} />
+      )}
+
+      {/* 5. الأفلام المشابهة */}
+      {id && <SimilarMovies movieId={id} />}
+
     </div>
   );
 }

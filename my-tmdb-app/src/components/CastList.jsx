@@ -20,6 +20,7 @@ export default function CastList({ cast }) {
                   ? `https://image.tmdb.org/t/p/w300${actor.profile_path}`
                   : "/no-avatar.png"
               }
+              loading="lazy"
               alt={actor.name}
               className="rounded mb-2"
             />
