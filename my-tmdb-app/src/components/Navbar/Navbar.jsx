@@ -1,18 +1,17 @@
-// src/components/Navbar/Navbar.jsx (التحديث النهائي للتصميم)
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import MoviesDropdown from './MoviesDropdown'; 
-// import TVShowsDropdown from './TVShowsDropdown'; // إذا قمت بإنشائه
 import SearchBar from '../SearchBar';
 
-// مكون بسيط لرابط التنقل
+
 const NavLink = ({ to, children }) => (
     <Link 
         to={to} 
         className="text-lg relative group transition duration-300"
     >
         {children}
-        {/* خط تحت الرابط يظهر عند التحويم */}
+       
         <span className="absolute left-0 bottom-0 h-0.5 w-0 bg-blue-400 transition-all duration-300 group-hover:w-full"></span>
     </Link>
 );
@@ -33,20 +32,18 @@ export default function Navbar() {
     return (
         <nav className="bg-gray-800 text-white px-8 py-4 flex justify-between items-center sticky top-0 z-50 shadow-2xl">
             
-            {/* 1. اللوغو والصفحة الرئيسية */}
+            
             <Link to="/" className="text-3xl font-extrabold text-blue-400 hover:text-blue-300 transition tracking-wider">
                 🎬 TMDB App
             </Link>
 
-            {/* 2. روابط التنقل */}
+         
             <div className="flex gap-8 items-center text-gray-300">
                 
-                {/* قائمة الأفلام Dropdown */}
-                {/* تأكد من أن MoviesDropdown يستخدم نفس تصميم الروابط */}
+               
                 <MoviesDropdown />
                 
-                {/* قائمة المسلسلات Dropdown */}
-                {/* {<TVShowsDropdown />} */}
+                
                 
                 <NavLink to="/actors">Actors</NavLink>
                 
@@ -55,7 +52,7 @@ export default function Navbar() {
                 </NavLink>
             </div>
 
-            {/* 3. شريط البحث */}
+            
             <div className="w-80">
                 <SearchBar 
                     value={searchTerm} 

@@ -1,4 +1,3 @@
-// src/hooks/useInfiniteMovies.js
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { fetchFromApi } from "../api/tmdb";
 

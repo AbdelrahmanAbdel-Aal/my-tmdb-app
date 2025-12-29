@@ -1,4 +1,4 @@
-// src/components/Navbar/MoviesDropdown.jsx
+
 import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -9,7 +9,7 @@ function useMovieGenres() {
     return useQuery({
         queryKey: ['movie-genres'],
         queryFn: () => fetchFromApi('/genre/movie/list'),
-        staleTime: Infinity, // لا تتغير الأنواع، لذا يمكن تخزينها للأبد
+        staleTime: Infinity,
     });
 }
 
@@ -66,7 +66,7 @@ export default function MoviesDropdown() {
                         {genresData?.genres.map((genre) => (
                             <Link
                                 key={genre.id}
-                                to={`/movies/genre/${genre.id}`} // استخدام المسار الديناميكي الجديد
+                                to={`/movies/genre/${genre.id}`} 
                                 onClick={() => setIsOpen(false)}
                                 className="block px-3 py-1 text-white hover:bg-gray-700 rounded transition"
                             >
