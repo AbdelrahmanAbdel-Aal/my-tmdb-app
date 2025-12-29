@@ -12,18 +12,18 @@ const SKELETON_COUNT = 18;
 export default function Home() {
   const scrollRef = useRef(null); // Reference for the scrolling container
 
-  // جلب الأفلام الرائجة (للكاروسيل)
+  // trendig movies for the carousel
   const { data: carouselData, isLoading: isLoadingCarousel } = useTrendingMovies();
   const trendingMoviesForCarousel = carouselData?.results || []; 
 
   console.log("Trending Movies Count:", trendingMoviesForCarousel.length);
-  // جلب المزيد من الأفلام (للتمرير اللانهائي)
+  //Get infinite movies for the grid
   const {
     data: infiniteData,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-    // لا نحتاج لـ error هنا، لكن يمكننا إضافته
+    // we don't need isLoading here because we have isLoadingCarousel
   } = useInfiniteMovies();
 
   const loadMoreRef = useInfiniteScroll({
@@ -34,15 +34,15 @@ export default function Home() {
 
   const allMovies = infiniteData?.pages.flatMap((page) => page.results) || [];
 
-  // تصفية الأفلام في شبكة Browse More لمنع تكرار الأفلام الموجودة في الكاروسيل (أول 10)
+  //To avoid duplication between carousel and grid
   const moviesInGrid = allMovies.filter(
     (movie) =>
       !trendingMoviesForCarousel
-        .slice(0, 10) // تصفية أول 10 أفلام من الكاروسيل
+        .slice(0, 10) // To avoid checking all carousel movies, only the first 10 shown
         .some((tMovie) => tMovie.id === movie.id)
   );
 
-  // دالة التعامل مع التمرير الأفقي
+  // Function to handle side scrolling
   const scroll = (direction) => {
     if (scrollRef.current) {
       const { current } = scrollRef;
@@ -55,11 +55,10 @@ export default function Home() {
     }
   };
 
-  // حالة التحميل (Skeleton)
+  // show skeletons while loading carousel data
   if (isLoadingCarousel && !allMovies.length) {
     return (
       <div className="p-6">
-        {/* ... (كود التحميل Skeleton كما هو) ... */}
         <h2 className="text-3xl font-bold text-white mb-6">Trending Movies</h2>
         <div className="flex space-x-4 overflow-hidden mb-12">
           {Array.from({ length: 6 }).map((_, i) => (
@@ -86,7 +85,7 @@ export default function Home() {
         <img
           src="/Promotional_image.png"
           alt="Promotional Image"
-          // تأكد من أن هذه التنسيقات تعمل بشكل جيد على الـ W-full
+          // Making sure the image is responsive
           className="w-lg mb-6 flex mx-auto rounded-lg shadow-lg"
         />
       </div>
@@ -110,13 +109,13 @@ export default function Home() {
             className="flex gap-4 overflow-x-auto scroll-smooth scrollbar-hide pb-4"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
-            {/* عرض أول 10 أفلام رائجة */}
+            {/* show first 10 trending movies */}
             {trendingMoviesForCarousel.slice(0, 10).map((movie) => (
               <div key={movie.id} className="min-w-[160px] md:min-w-[200px] flex-shrink-0">
                 <MovieCard movie={movie} />
               </div>
             ))}
-            {/* إذا لم يتم تحميل أي أفلام بعد، يمكنك عرض Skeleton هنا أيضًا */}
+            {/*if there are no trending movies, show a message */}
             {!isLoadingCarousel && trendingMoviesForCarousel.length === 0 && (
                 <p className="text-gray-400">No trending movies available.</p>
             )}
