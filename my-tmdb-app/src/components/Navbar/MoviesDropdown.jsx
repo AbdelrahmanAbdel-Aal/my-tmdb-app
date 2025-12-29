@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { fetchFromApi } from '../../api/tmdb';
 
-// Hook مخصص لجلب الأنواع
+// get tyepse of movie genres
 function useMovieGenres() {
     return useQuery({
         queryKey: ['movie-genres'],
@@ -24,7 +24,7 @@ export default function MoviesDropdown() {
     const { data: genresData } = useMovieGenres();
     const dropdownRef = useRef(null);
 
-    // لإغلاق القائمة عند النقر خارجها
+    // Close dropdown when clicking outside
     React.useEffect(() => {
         function handleClickOutside(event) {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {

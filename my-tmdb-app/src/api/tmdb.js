@@ -2,8 +2,10 @@ const BASE_URL = "https://api.themoviedb.org/3";
 
 
 export async function fetchTrendingMovies(page = 1) {
+  const pageNumber = typeof page === 'number' ? page : 1;
   const response = await fetch(
-    `https://api.themoviedb.org/3/trending/movie/day?page=${page}`,
+  
+    `https://api.themoviedb.org/3/trending/movie/day?page=${pageNumber}`,
     {
       headers: {
         Authorization: `Bearer ${import.meta.env.VITE_TMDB_ACCESS_TOKEN}`,
@@ -72,14 +74,14 @@ export async function searchMovies(query) {
   return response.json();
 }
 
-// src/api/tmdb.js
 export async function fetchFromApi(endpoint, params = {}) {
   const url = new URL(
-    `https://api.themoviedb.org/3${endpoint}`
+    `${BASE_URL}${endpoint}`
   );
 
+
   Object.entries(params).forEach(([key, value]) =>
-    url.searchParams.append(key, value)
+    url.searchParams.append(key, String(value)) 
   );
 
   const res = await fetch(url, {

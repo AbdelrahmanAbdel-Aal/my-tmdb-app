@@ -1,42 +1,65 @@
+// src/pages/Home.jsx
+import { useRef } from "react";
 import MovieCard from "../components/MovieCard";
 import MovieCardSkeleton from "../components/MovieCardSkeleton";
-import MovieCarousel from "../components/MovieCarousel";
-import { useTrendingMovies } from "../hooks/useTrendingMovies";
-import { useInfiniteMovies } from "../hooks/useInfiniteMovies";
+import { useTrendingMovies } from "../hooks/useTrendingMovies"; // Hook للكاروسيل
+import { useInfiniteMovies } from "../hooks/useInfiniteMovies"; // Hook للتمرير اللانهائي
 import { useInfiniteScroll } from "../hooks/useInfiniteScroll";
+// تم إزالة import MovieCarousel لأننا نستخدم MovieCard مباشرة
 
 const SKELETON_COUNT = 18;
 
 export default function Home() {
-  const { data: carouselData, isLoading: isLoadingCarousel } =
-    useTrendingMovies(); //
-  const trendingMoviesForCarousel = carouselData?.results || [];
+  const scrollRef = useRef(null); // Reference for the scrolling container
 
+  // جلب الأفلام الرائجة (للكاروسيل)
+  const { data: carouselData, isLoading: isLoadingCarousel } = useTrendingMovies();
+  const trendingMoviesForCarousel = carouselData?.results || []; 
+
+  console.log("Trending Movies Count:", trendingMoviesForCarousel.length);
+  // جلب المزيد من الأفلام (للتمرير اللانهائي)
   const {
     data: infiniteData,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    // لا نحتاج لـ error هنا، لكن يمكننا إضافته
   } = useInfiniteMovies();
 
   const loadMoreRef = useInfiniteScroll({
     fetchNextPage,
     hasNextPage,
     isFetching: isFetchingNextPage,
-  }); //
+  });
 
   const allMovies = infiniteData?.pages.flatMap((page) => page.results) || [];
 
+  // تصفية الأفلام في شبكة Browse More لمنع تكرار الأفلام الموجودة في الكاروسيل (أول 10)
   const moviesInGrid = allMovies.filter(
     (movie) =>
       !trendingMoviesForCarousel
-        .slice(0, 15)
+        .slice(0, 10) // تصفية أول 10 أفلام من الكاروسيل
         .some((tMovie) => tMovie.id === movie.id)
   );
 
+  // دالة التعامل مع التمرير الأفقي
+  const scroll = (direction) => {
+    if (scrollRef.current) {
+      const { current } = scrollRef;
+      const scrollAmount = 300;
+      if (direction === "left") {
+        current.scrollLeft -= scrollAmount;
+      } else {
+        current.scrollLeft += scrollAmount;
+      }
+    }
+  };
+
+  // حالة التحميل (Skeleton)
   if (isLoadingCarousel && !allMovies.length) {
     return (
       <div className="p-6">
+        {/* ... (كود التحميل Skeleton كما هو) ... */}
         <h2 className="text-3xl font-bold text-white mb-6">Trending Movies</h2>
         <div className="flex space-x-4 overflow-hidden mb-12">
           {Array.from({ length: 6 }).map((_, i) => (
@@ -46,9 +69,7 @@ export default function Home() {
           ))}
         </div>
 
-        <h2 className="text-2xl font-bold text-white mb-6 mt-10">
-          More Movies
-        </h2>
+        <h2 className="text-2xl font-bold text-white mb-6 mt-10">More Movies</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {Array.from({ length: SKELETON_COUNT }).map((_, i) => (
             <MovieCardSkeleton key={i} />
@@ -60,11 +81,58 @@ export default function Home() {
 
   return (
     <div className="p-6">
-      <MovieCarousel
-        title="🔥 Trending Now"
-        movies={trendingMoviesForCarousel.slice(0, 15)}
-      />
+      {/* Promotional Image */}
+      <div className="mb-12">
+        <img
+          src="/Promotional_image.png"
+          alt="Promotional Image"
+          // تأكد من أن هذه التنسيقات تعمل بشكل جيد على الـ W-full
+          className="w-lg mb-6 flex mx-auto rounded-lg shadow-lg"
+        />
+      </div>
 
+      {/* NEW: Horizontal Trending Movies Section (Carousel) */}
+      <div className="mb-10 relative group">
+        <h2 className="text-2xl font-bold text-white mb-4">Trending Now</h2>
+        
+        <div className="relative">
+          {/* Left Button */}
+          <button
+            onClick={() => scroll("left")}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-black/60 hover:bg-black/80 text-white p-3 rounded-full opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-0"
+          >
+            &#10094; 
+          </button>
+
+          {/* Scrollable Container */}
+          <div
+            ref={scrollRef}
+            className="flex gap-4 overflow-x-auto scroll-smooth scrollbar-hide pb-4"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          >
+            {/* عرض أول 10 أفلام رائجة */}
+            {trendingMoviesForCarousel.slice(0, 10).map((movie) => (
+              <div key={movie.id} className="min-w-[160px] md:min-w-[200px] flex-shrink-0">
+                <MovieCard movie={movie} />
+              </div>
+            ))}
+            {/* إذا لم يتم تحميل أي أفلام بعد، يمكنك عرض Skeleton هنا أيضًا */}
+            {!isLoadingCarousel && trendingMoviesForCarousel.length === 0 && (
+                <p className="text-gray-400">No trending movies available.</p>
+            )}
+          </div>
+
+          {/* Right Button */}
+          <button
+            onClick={() => scroll("right")}
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-black/60 hover:bg-black/80 text-white p-3 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            &#10095;
+          </button>
+        </div>
+      </div>
+
+      {/* Browse More Section */}
       <h1 className="text-white text-2xl mb-6 mt-10 border-b border-gray-700 pb-2">
         Browse More
       </h1>
